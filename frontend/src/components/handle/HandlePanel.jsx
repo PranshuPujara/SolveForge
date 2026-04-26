@@ -67,7 +67,7 @@ export const HandlePanel = ({ hook, excludeSolved, onExcludeChange, showOnlySolv
               value={inputVal}
               onChange={e => setInputVal(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="e.g. tourist"
+              placeholder="e.g. Immutable"
               disabled={isLoading || isOk}
               style={{ paddingRight: isOk ? 36 : 12 }}
             />
