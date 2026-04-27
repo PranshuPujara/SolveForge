@@ -8,6 +8,15 @@ const { getFriendsData }                = require('../services/codeforcesService
 const { filterProblems }                = require('../utils/filterEngine');
 const { pickRandom }                    = require('../utils/random');
 
+/* ── Helper: load problem pool by platform ─────── */
+async function loadProblems(platform) {
+  if (platform === 'codeforces') return getCFProblems();
+  if (platform === 'leetcode')   return getLCProblems();
+  if (platform === 'gfg')        return getGFGProblems();
+  return null;
+}
+
+/* ── POST /pick — random problem matching filters ── */
 router.post('/pick', async (req, res, next) => {
   try {
     const {
@@ -26,11 +35,8 @@ router.post('/pick', async (req, res, next) => {
     } = req.body;
 
     // Load problem pool
-    let problems = [];
-    if      (platform === 'codeforces') problems = await getCFProblems();
-    else if (platform === 'leetcode')   problems = await getLCProblems();
-    else if (platform === 'gfg')        problems = await getGFGProblems();
-    else return res.status(400).json({ error: `Unknown platform: ${platform}` });
+    const problems = await loadProblems(platform);
+    if (!problems) return res.status(400).json({ error: `Unknown platform: ${platform}` });
 
     // Friend data
     let solvedSet = new Set(), attemptedSet = new Set(), perProblem = {};
@@ -102,13 +108,43 @@ router.post('/pick', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+/* ── POST /reattempt — fetch a specific problem by ID ── */
+router.post('/reattempt', async (req, res, next) => {
+  try {
+    const { platform = 'codeforces', problemId } = req.body;
+
+    if (!problemId) {
+      return res.status(400).json({ error: 'problemId is required.' });
+    }
+
+    const problems = await loadProblems(platform);
+    if (!problems) {
+      return res.status(400).json({ error: `Unknown platform: ${platform}` });
+    }
+
+    // Find the exact problem by its ID in the full problem pool
+    const found = problems.find(p => p.id === problemId);
+
+    if (!found) {
+      return res.status(404).json({
+        error: `Problem "${problemId}" not found on ${platform}.`,
+        notFound: true,
+      });
+    }
+
+    res.json({
+      problem: { ...found, platform },
+      meta: { isReattempt: true, platform },
+    });
+  } catch (err) { next(err); }
+});
+
+/* ── POST /daily — deterministic daily problem ── */
 router.post('/daily', async (req, res, next) => {
   try {
     const { platform='codeforces', tags=[], minRating=1000, maxRating=1800 } = req.body;
-    let problems = [];
-    if      (platform==='codeforces') problems = await getCFProblems();
-    else if (platform==='leetcode')   problems = await getLCProblems();
-    else if (platform==='gfg')        problems = await getGFGProblems();
+    const problems = await loadProblems(platform);
+    if (!problems) return res.status(400).json({ error: `Unknown platform: ${platform}` });
     const filtered = filterProblems({ problems, tags, minRating, maxRating });
     if (!filtered.length) return res.status(404).json({ error: 'No daily problem found.' });
     const today = new Date().toISOString().slice(0,10);
@@ -117,6 +153,7 @@ router.post('/daily', async (req, res, next) => {
   } catch(err) { next(err); }
 });
 
+/* ── GET /tags ── */
 router.get('/tags', async (req, res, next) => {
   try {
     const { platform='codeforces' } = req.query;

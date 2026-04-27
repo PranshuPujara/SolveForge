@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, memo, useMemo } from 'react';
-import { Zap, Menu, X, Compass, User, History, CalendarDays, AlertCircle, ChevronDown } from 'lucide-react';
+import { Zap, Menu, X, Compass, User, History, CalendarDays, AlertCircle, ChevronDown, Swords } from 'lucide-react';
 import { storage, getLastRating } from './utils/localStorage';
 import { useProblemPicker } from './hooks/useProblemPicker';
 import { useUserHandle } from './hooks/useUserHandle';
@@ -121,13 +121,14 @@ export default function App() {
   const [histKey, setHistKey] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activePanel, setActivePanel] = useState('discover'); // 'discover' | 'profile' | 'history'
+  const [reattemptId, setReattemptId] = useState(null); // tracks active re-attempt for banner
   const mainRef = useRef(null);
 
   const [excludeSolved, setExcludeSolved] = useState(() => storage.get('excludeSolved', false));
   const [showOnlySolved, setShowOnlySolved] = useState(() => storage.get('showOnlySolved', false));
   const userHandle = useUserHandle();
 
-  const { problem, loading, error, meta, noFriendMatch, pick, fetchDaily, clear } = useProblemPicker();
+  const { problem, loading, error, meta, noFriendMatch, pick, reattempt, fetchDaily, clear } = useProblemPicker();
   const { ready, hasPlatform, hasDifficulty } = useReady(platform, minRating, maxRating, difficulty);
 
   useEffect(() => {
@@ -160,7 +161,9 @@ export default function App() {
       : {}),
   }), [platform, tags, minRating, maxRating, difficulty, filterMode, friends, smartMode, userHandle, excludeSolved, showOnlySolved]);
 
-  const handlePick = useCallback(() => { if (ready) pick(buildPayload()); }, [ready, pick, buildPayload]);
+  const handlePick = useCallback(() => {
+    if (ready) { setReattemptId(null); pick(buildPayload()); }
+  }, [ready, pick, buildPayload]);
   const handleDaily = useCallback(() => { if (ready) fetchDaily(buildPayload()); }, [ready, fetchDaily, buildPayload]);
   const handleSuggestAnyway = useCallback(() => {
     if (ready) pick({ ...buildPayload(), ignoreFilterMode: true });
@@ -181,6 +184,21 @@ export default function App() {
     if (mainRef.current) mainRef.current.scrollTop = 0;
     setMobileOpen(false);
   }, []);
+
+  // ── Re-attempt: switch to Discover, show banner, fetch the specific problem ──
+  const handleReattempt = useCallback((historyId) => {
+    setReattemptId(historyId);
+    switchPanel('discover');
+    reattempt(historyId);
+  }, [switchPanel, reattempt]);
+
+  // Auto-dismiss re-attempt banner after problem loads
+  useEffect(() => {
+    if (reattemptId && problem && !loading) {
+      const t = setTimeout(() => setReattemptId(null), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [reattemptId, problem, loading]);
 
   const hasFriends = friends.length > 0 && platform === 'codeforces';
   const diffBadge = platform === 'codeforces'
@@ -308,7 +326,7 @@ export default function App() {
 
         <div style={{ display: activePanel === 'history' ? 'block' : 'none', padding: '0 18px 24px' }}>
           <div style={{ paddingTop: 4 }}>
-            <HistoryPanel onClear={() => setHistKey(k => k + 1)} />
+            <HistoryPanel onClear={() => setHistKey(k => k + 1)} onReattempt={handleReattempt} />
           </div>
         </div>
       </div>
@@ -433,6 +451,35 @@ export default function App() {
                   {smartMode && <><span style={{ color: 'var(--b2)' }}>·</span><span style={{ color: 'var(--primary)', fontWeight: 700 }}>smart</span></>}
                 </div>
 
+                {/* Re-attempt banner — shown when retrying a problem from history */}
+                {reattemptId && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px', borderRadius: 10,
+                    background: 'var(--primary-bg)',
+                    border: '1px solid var(--primary)',
+                    animation: 'fadeUp 0.3s ease both',
+                  }}>
+                    <Swords size={16} strokeWidth={2} color="var(--primary)" style={{ flexShrink: 0 }} />
+                    <span style={{
+                      flex: 1, fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--primary)', fontWeight: 700,
+                    }}>
+                      Re-attempting{' '}
+                      <span style={{ color: 'var(--t1)' }}>
+                        {reattemptId.includes(':') ? reattemptId.split(':').slice(1).join(':') : reattemptId}
+                      </span>
+                    </span>
+                    <button type="button" onClick={() => setReattemptId(null)} style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--primary)', fontSize: 16, lineHeight: 1, padding: '2px 6px',
+                      opacity: 0.6, borderRadius: 4,
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+                    >×</button>
+                  </div>
+                )}
+
                 {/* CTA */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                   <div style={{ display: 'flex', gap: 9 }}>
@@ -543,7 +590,7 @@ export default function App() {
                     Problems ForgeSolve has shown you. Click any item to dive into it.
                   </p>
                 </div>
-                <HistoryPanel onClear={() => setHistKey(k => k + 1)} forceOpen />
+                <HistoryPanel onClear={() => setHistKey(k => k + 1)} onReattempt={handleReattempt} forceOpen />
               </div>
             )}
 
