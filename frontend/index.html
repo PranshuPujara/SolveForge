@@ -1,19 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/ForgeSolve_titlebar.png?v=4" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/ForgeSolve_titlebar.png?v=4" />
-    <link rel="shortcut icon" type="image/png" href="/ForgeSolve_titlebar.png?v=4" />
-    <link rel="apple-touch-icon" href="/ForgeSolve_titlebar.png?v=4" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,700;1,14..32,800;1,14..32,900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-    <title>ForgeSolve — Competitive Problem Discovery</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>ForgeSolve — Competitive Problem Discovery</title>
+  <meta name="description"
+    content="Smart competitive programming problem picker for Codeforces, LeetCode and GFG. Filter by rating, tags, difficulty, and friends. Track your streak and history." />
+  <meta name="keywords"
+    content="competitive programming, codeforces, leetcode, gfg, problem picker, cp practice, rating filter, problem discovery" />
+  <meta name="author" content="Pranshu Pujara" />
+  <meta name="google-site-verification" content="_RD8LovKXwu-BFok5WC8VspnDamlbbJANErmrY1BExc" />
+  <meta name="theme-color" content="#00d9ff" />
+
+  <!-- Open Graph — controls how your link looks when shared on LinkedIn, Discord, etc. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="ForgeSolve — Competitive Problem Discovery" />
+  <meta property="og:description"
+    content="Stop scrolling problemsets. Get the right problem for your level, instantly. Supports Codeforces, LeetCode & GFG." />
+  <meta property="og:image" content="https://forgesolve.vercel.app/SolveForge_logo.png" />
+  <meta property="og:url" content="https://forgesolve.vercel.app" />
+  <meta property="og:site_name" content="ForgeSolve" />
+
+  <!-- Twitter / X card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ForgeSolve — Competitive Problem Discovery" />
+  <meta name="twitter:description"
+    content="Stop scrolling problemsets. Get the right problem for your level, instantly." />
+  <meta name="twitter:image" content="https://forgesolve.vercel.app/SolveForge_logo.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/ForgeSolve_titlebar.png?v=4" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/ForgeSolve_titlebar.png?v=4" />
+  <link rel="shortcut icon" type="image/png" href="/ForgeSolve_titlebar.png?v=4" />
+  <link rel="apple-touch-icon" href="/ForgeSolve_titlebar.png?v=4" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,700;1,14..32,800;1,14..32,900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Microsoft Clarity — replace YOUR_PROJECT_ID with your actual ID from clarity.microsoft.com -->
+  <!--
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/YOUR_PROJECT_ID";
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,"clarity","script");
+    </script>
+    -->
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
